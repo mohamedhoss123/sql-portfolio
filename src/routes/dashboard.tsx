@@ -1,0 +1,401 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useMemo } from 'react'
+import { projects, experience, skills } from '../data/portfolio-data'
+
+export const Route = createFileRoute('/dashboard')({
+    component: DashboardPage,
+})
+
+type TableView = 'projects' | 'experience' | 'skills';
+
+function DashboardPage() {
+    const [activeTable, setActiveTable] = useState<TableView>('projects')
+    const [isDetailOpen, setIsDetailOpen] = useState(false)
+    const [selectedId, setSelectedId] = useState('1001')
+
+    const activeProject = useMemo(() =>
+        projects.find(p => p.id === selectedId) || projects[0],
+        [selectedId])
+
+    const openDetail = (id: string) => {
+        setSelectedId(id)
+        setIsDetailOpen(true)
+    }
+
+    const queryText = useMemo(() => {
+        switch (activeTable) {
+            case 'projects':
+                return (
+                    <>
+                        <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
+                        <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
+                        <span className="text-yellow-600 dark:text-code-orange">public.projects_tbl</span>
+                        <span className="text-primary dark:text-code-purple font-bold"> ORDER BY </span>
+                        date <span className="text-primary dark:text-code-purple font-bold">DESC</span>;
+                    </>
+                )
+            case 'experience':
+                return (
+                    <>
+                        <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
+                        <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
+                        <span className="text-yellow-600 dark:text-code-orange">public.experience_tbl</span>;
+                    </>
+                )
+            case 'skills':
+                return (
+                    <>
+                        <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
+                        <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
+                        <span className="text-yellow-600 dark:text-code-orange">public.skills_matrix</span>;
+                    </>
+                )
+        }
+    }, [activeTable])
+
+    return (
+        <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen flex flex-col overflow-hidden selection:bg-primary/30 selection:text-white relative">
+            {/* Header */}
+            <header className="h-16 bg-white dark:bg-db-panel border-b border-gray-200 dark:border-db-border flex items-center px-4 shrink-0 shadow-sm z-20">
+                <div className="flex items-center gap-4 w-full">
+                    <Link to="/" className="flex items-center gap-2 mr-6 text-primary hover:opacity-80 transition-opacity">
+                        <span className="material-icons">storage</span>
+                        <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">Mohamed DB</span>
+                    </Link>
+                    <div className="hidden md:flex flex-1 max-w-4xl bg-gray-100 dark:bg-db-dark border border-gray-200 dark:border-db-border rounded px-4 py-2 items-center gap-3 font-mono text-sm relative group transition-colors focus-within:border-primary/50">
+                        <span className="material-icons text-gray-400 text-lg">terminal</span>
+                        <div className="flex-1 truncate outline-none bg-transparent text-gray-800 dark:text-gray-300">
+                            {queryText}
+                        </div>
+                        <button className="bg-primary/20 hover:bg-primary/30 text-primary p-1 rounded transition-colors" title="Execute Query">
+                            <span className="material-icons text-sm">play_arrow</span>
+                        </button>
+                    </div>
+                    <div className="ml-auto flex items-center gap-4">
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-code-gray font-mono bg-gray-100 dark:bg-db-dark px-2 py-1 rounded border border-gray-200 dark:border-db-border">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Connected: 127.0.0.1
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white dark:ring-db-border overflow-hidden">
+                            <img alt="Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGgvJ3kZWdJz_TrxUidhlw96b-GcOXXDfGwWl4qM7Hxkxk7WiRFSxvuPbY2dBT9zInNelVcBpQErPtRC6m-2LcmKzXRnq24YGGUb52KoChvbKcB5BN-9LwIJ2Ybs8YHu4Lqwq2ZdurlWCx3DNaT_n63XkSKbI-vMkAVon6t0aifS5VQx4WxQqZ2G3ff2dPAaqcFW06W78LAp0HZ0CPpOruHKDH8Gk4hC7JuUcNL7Wq6-97bW4GdbvFQwbtOWbgz8z31wQaMVWZ_Far" />
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div className="flex flex-1 overflow-hidden relative">
+                {/* Sidebar */}
+                <aside className="w-64 bg-white dark:bg-db-panel border-r border-gray-200 dark:border-db-border flex flex-col shrink-0 overflow-y-auto hidden md:flex font-mono">
+                    <div className="p-4 border-b border-gray-200 dark:border-db-border">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Explorer</h3>
+                        <div className="text-sm font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-200">
+                            <span className="material-icons text-sm">dns</span>
+                            LOCALHOST_PROD
+                        </div>
+                    </div>
+                    <nav className="flex-1 p-2 space-y-1 text-sm">
+                        <div className="group">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white cursor-pointer">
+                                <span className="material-icons text-xs transform transition-transform group-hover:rotate-90">arrow_right</span>
+                                <span className="material-icons text-sm text-yellow-500">folder</span>
+                                <span>schemas</span>
+                            </div>
+                        </div>
+                        <div className="group">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-800 dark:text-gray-200 cursor-pointer">
+                                <span className="material-icons text-xs transform rotate-90">arrow_right</span>
+                                <span className="material-icons text-sm text-yellow-500">folder_open</span>
+                                <span>public</span>
+                            </div>
+                            <div className="ml-6 space-y-0.5 mt-1 border-l border-gray-200 dark:border-db-border pl-2">
+                                <button
+                                    onClick={() => setActiveTable('projects')}
+                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'projects'
+                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                        }`}
+                                >
+                                    <span className="material-icons text-sm">table_chart</span>
+                                    <span>projects_tbl</span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTable('experience')}
+                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'experience'
+                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                        }`}
+                                >
+                                    <span className="material-icons text-sm">table_chart</span>
+                                    <span>experience_tbl</span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTable('skills')}
+                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'skills'
+                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                        }`}
+                                >
+                                    <span className="material-icons text-sm">insights</span>
+                                    <span>skills_matrix</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="group mt-4">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white cursor-pointer">
+                                <span className="material-icons text-xs transform">arrow_right</span>
+                                <span className="material-icons text-sm text-purple-500">visibility</span>
+                                <span>stored_procedures</span>
+                            </div>
+                        </div>
+                    </nav>
+                    <div className="p-4 border-t border-gray-200 dark:border-db-border">
+                        <a
+                            href="/Mohammad-Hossam-FlowCV-Resume-20260204.pdf"
+                            download
+                            className="w-full bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded text-sm font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="material-icons text-sm">download</span>
+                            EXPORT CV
+                        </a>
+                    </div>
+                </aside>
+
+                {/* Main Content Area */}
+                <main className="flex-1 flex flex-col bg-white dark:bg-db-dark overflow-hidden relative">
+                    {/* Tabs */}
+                    <div className="flex items-center bg-gray-50 dark:bg-db-panel border-b border-gray-200 dark:border-db-border overflow-x-auto no-scrollbar">
+                        <div className="px-4 py-2 bg-white dark:bg-db-dark border-r border-t-2 border-t-primary border-r-gray-200 dark:border-r-db-border text-sm font-medium flex items-center gap-2 min-w-fit text-gray-900 dark:text-white">
+                            <span className="material-icons text-sm text-blue-400">table_chart</span>
+                            {activeTable}_tbl
+                            <span className="material-icons text-xs text-gray-400 hover:text-red-400 cursor-pointer ml-2">close</span>
+                        </div>
+                    </div>
+
+                    {/* Toolbar */}
+                    <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-db-border bg-white dark:bg-db-dark">
+                        <div className="flex items-center gap-2">
+                            <button className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Refresh">
+                                <span className="material-icons text-lg">refresh</span>
+                            </button>
+                            <button className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Filter">
+                                <span className="material-icons text-lg">filter_list</span>
+                            </button>
+                            <div className="h-4 w-px bg-gray-300 dark:bg-db-border mx-1"></div>
+                            <span className="text-xs text-gray-500 font-mono">
+                                Showing all rows from {activeTable}_tbl
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 font-mono mr-2">0.024s query time</span>
+                        </div>
+                    </div>
+
+                    {/* Data Grid */}
+                    <div className="flex-1 overflow-auto relative bg-white dark:bg-db-dark">
+                        <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(#7a7dff 1px, transparent 1px), linear-gradient(90deg, #7a7dff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-gray-50 dark:bg-db-panel sticky top-0 z-10 shadow-sm">
+                                {activeTable === 'projects' && (
+                                    <tr>
+                                        <th className="p-0 border-b border-r border-gray-200 dark:border-db-border w-10 text-center bg-gray-50 dark:bg-db-panel"></th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase w-16">ID <span className="material-icons text-[10px] align-middle ml-1 opacity-50">vpn_key</span></th>
+                                        <th className="py-2 px-4 text-xs font-bold text-primary dark:text-code-blue border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">PROJECT_NAME</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">TECH_STACK []</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase w-32">STATUS</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">LAST_COMMIT</th>
+                                    </tr>
+                                )}
+                                {activeTable === 'experience' && (
+                                    <tr>
+                                        <th className="p-0 border-b border-r border-gray-200 dark:border-db-border w-10 text-center bg-gray-50 dark:bg-db-panel"></th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase w-64">ROLE / COMPANY</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">TECH_STACK []</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">DURATION</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">DESCRIPTION</th>
+                                    </tr>
+                                )}
+                                {activeTable === 'skills' && (
+                                    <tr>
+                                        <th className="p-0 border-b border-r border-gray-200 dark:border-db-border w-10 text-center bg-gray-50 dark:bg-db-panel"></th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase w-48">CATEGORY</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-r border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">PROFICIENCY</th>
+                                        <th className="py-2 px-4 text-xs font-bold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-db-border tracking-wider font-mono uppercase">SKILLS []</th>
+                                    </tr>
+                                )}
+                            </thead>
+                            <tbody className="text-sm font-mono text-gray-700 dark:text-gray-300 divide-y divide-gray-200 dark:divide-db-border">
+                                {activeTable === 'projects' && projects.map((project, index) => (
+                                    <tr
+                                        key={project.id}
+                                        onClick={() => openDetail(project.id)}
+                                        className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default"
+                                    >
+                                        <td className="border-r border-gray-200 dark:border-db-border text-center text-gray-400 text-xs bg-gray-50 dark:bg-db-panel/50">{index + 1}</td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border text-gray-500 dark:text-gray-500">{project.id}</td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border font-medium text-gray-900 dark:text-white group-hover:text-primary transition-colors flex items-center gap-2">
+                                            <div className={`w-8 h-8 rounded bg-gradient-to-tr ${project.gradient} flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}>
+                                                {project.short}
+                                            </div>
+                                            <span>{project.name}</span>
+                                        </td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border">
+                                            <div className="flex flex-wrap gap-1">
+                                                {project.tech.map((t) => (
+                                                    <span key={t} className="px-1.5 py-0.5 rounded text-[10px] bg-primary/10 text-primary dark:bg-primary/20 dark:text-code-blue border border-primary/20">
+                                                        {t}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="py-3 px-3 border-r border-gray-200 dark:border-db-border">
+                                            <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-${project.statusColor}-100 text-${project.statusColor}-700 dark:bg-${project.statusColor}-900/20 dark:text-${project.statusColor === 'green' ? 'code-green' : project.statusColor + '-500'} border border-${project.statusColor}-200 dark:border-${project.statusColor}-900/50`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full bg-${project.statusColor}-500 ${project.status === 'Beta' || project.status === 'In Dev' ? 'animate-pulse' : ''}`}></span> {project.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4 text-gray-500 dark:text-gray-500 text-xs">{project.lastCommit}</td>
+                                    </tr>
+                                ))}
+
+                                {activeTable === 'experience' && experience.map((exp, index) => (
+                                    <tr key={exp.id} className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default">
+                                        <td className="border-r border-gray-200 dark:border-db-border text-center text-gray-400 text-xs bg-gray-50 dark:bg-db-panel/50">{index + 1}</td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border">
+                                            <div className="font-medium text-gray-900 dark:text-white group-hover:text-primary transition-colors">{exp.role}</div>
+                                            <div className="text-xs text-gray-500 tracking-tight">{exp.company}</div>
+                                        </td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border">
+                                            <div className="flex flex-wrap gap-1">
+                                                {exp.techStack.map((t) => (
+                                                    <span key={t} className="px-1.5 py-0.5 rounded text-[10px] bg-purple-100/50 text-purple-700 dark:bg-code-purple/20 dark:text-code-purple border border-code-purple/20">
+                                                        {t}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border text-xs text-code-orange">{exp.duration}</td>
+                                        <td className="py-3 px-4 text-xs text-gray-500 max-w-md truncate">{exp.description}</td>
+                                    </tr>
+                                ))}
+
+                                {activeTable === 'skills' && skills.map((skill, index) => (
+                                    <tr key={skill.id} className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default">
+                                        <td className="border-r border-gray-200 dark:border-db-border text-center text-gray-400 text-xs bg-gray-50 dark:bg-db-panel/50">{index + 1}</td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border font-medium text-gray-900 dark:text-white">{skill.category}</td>
+                                        <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border">
+                                            <div className="w-full bg-gray-100 dark:bg-db-dark rounded-full h-1.5 border border-db-border overflow-hidden p-[1px]">
+                                                <div className="bg-gradient-to-r from-primary to-code-blue h-full rounded-full transition-all duration-1000" style={{ width: `${skill.proficiency}%` }}></div>
+                                            </div>
+                                            <div className="text-[10px] text-right mt-1 text-primary">{skill.proficiency}%</div>
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <div className="flex flex-wrap gap-1">
+                                                {skill.items.map((it) => (
+                                                    <span key={it} className="px-1.5 py-0.5 rounded text-[10px] bg-green-100/30 text-green-700 dark:bg-code-green/20 dark:text-code-green border border-code-green/20">
+                                                        {it}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="p-8 text-center text-gray-400 dark:text-gray-600 font-mono text-sm opacity-50">
+                            -- {activeTable.toUpperCase()}_SET LIMIT NULL --
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-100 dark:bg-db-panel border-t border-gray-200 dark:border-db-border p-1 text-xs font-mono text-gray-500 dark:text-gray-400 flex items-center justify-between shrink-0 z-20">
+                        <div className="flex items-center gap-4 px-2">
+                            <div className="flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-db-border px-2 py-0.5 rounded cursor-pointer transition-colors">
+                                <span className="material-icons text-[14px]">call_split</span>
+                                <span>main*</span>
+                            </div>
+                            <div className="flex items-center gap-2 hover:bg-gray-200 dark:hover:bg-db-border px-2 py-0.5 rounded cursor-pointer transition-colors text-code-green">
+                                <span className="material-icons text-[14px]">check_circle</span>
+                                <span>DB Online</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 px-2">
+                            <div className="flex items-center gap-2">
+                                <span>CPU:</span>
+                                <div className="w-16 h-4 bg-gray-200 dark:bg-db-dark rounded overflow-hidden relative border border-gray-300 dark:border-db-border">
+                                    <div className="absolute inset-0 opacity-20" style={{ background: 'repeating-linear-gradient(90deg, #7a7dff, #7a7dff 2px, transparent 2px, transparent 4px)' }}></div>
+                                    <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 64 16">
+                                        <path d="M0 10 L8 8 L16 12 L24 6 L32 10 L40 4 L48 8 L56 2 L64 6" fill="none" stroke="#7a7dff" strokeWidth="1.5"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div className="hover:bg-gray-200 dark:hover:bg-db-border px-2 py-0.5 rounded cursor-pointer transition-colors">UTF-8</div>
+                            <div className="text-primary hover:bg-gray-200 dark:hover:bg-db-border px-2 py-0.5 rounded cursor-pointer transition-colors">
+                                <span className="material-icons text-[14px]">notifications</span>
+                            </div>
+                        </div>
+                    </footer>
+                </main>
+            </div>
+
+            {/* Row Detail View Panel */}
+            <div className={`absolute right-0 top-16 bottom-8 w-96 bg-white dark:bg-db-panel border-l border-gray-200 dark:border-db-border transform ${isDetailOpen && activeTable === 'projects' ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 shadow-2xl z-30 flex flex-col hidden lg:flex`}>
+                <div className="p-4 border-b border-gray-200 dark:border-db-border flex items-center justify-between">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Row Detail: ID {selectedId}</h2>
+                    <button onClick={() => setIsDetailOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                        <span className="material-icons text-sm">close</span>
+                    </button>
+                </div>
+                <div className="p-6 overflow-y-auto flex-1 font-mono">
+                    <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-db-border mb-6 group relative">
+                        <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors z-10 pointer-events-none"></div>
+                        <img alt="Project Screenshot" className="w-full h-40 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9udGtzFYcGsYr4sJbjKyEmeuMjfkYpGSdQOCjbk9SaxhiLgVUeXOiYTGUW60g95zaQeB-uvgrx_wk7Nsyf9ZsXxt90JUu4Xwvcy85aRG40y3ckLTivIUZPHAVont0Lzx-bHDGjmDyXwySG-Q48WJTH-KJmzoiTFJfL7x8UmP4qIT1WA5LS3B5eJRmgTe_EjF2TTAWsfSe3bsfs0DdcqzlmMTwMtVQxpdQw1e9bPxJFUrakLaf7xC0Ol1xRPLeJJI5cMUz4pC4Zn2-" />
+                    </div>
+                    <div className="space-y-4 text-sm">
+                        <div>
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">project_name</label>
+                            <div className="text-gray-900 dark:text-white font-medium bg-gray-100 dark:bg-db-dark p-2 rounded border border-gray-200 dark:border-db-border">
+                                {activeProject.name}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">description</label>
+                            <div className="text-gray-600 dark:text-gray-300 leading-relaxed text-xs">
+                                {activeProject.description}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">deploy_status</label>
+                                <div className="text-green-500 flex items-center gap-1">
+                                    <span className="material-icons text-sm">check_circle</span> Success
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">latency</label>
+                                <div className="text-gray-900 dark:text-white">{activeProject.latency}</div>
+                            </div>
+                        </div>
+                        <div className="pt-4 border-t border-gray-200 dark:border-db-border">
+                            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">json_preview</label>
+                            <pre className="bg-gray-900 text-gray-300 p-3 rounded text-[10px] overflow-x-auto border border-gray-700 leading-relaxed">{`{
+  "id": "${activeProject.id}",
+  "version": "${activeProject.version}",
+  "tech_stack": [
+    ${activeProject.tech.join(',\n    ')}
+  ],
+  "features": [
+    ${activeProject.features.map(f => `"${f}"`).join(',\n    ')}
+  ]
+}`}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-4 border-t border-gray-200 dark:border-db-border flex justify-end gap-2">
+                    <button className="px-3 py-1.5 rounded border border-gray-300 dark:border-db-border text-xs font-medium hover:bg-gray-100 dark:hover:bg-db-dark text-gray-700 dark:text-white transition-colors">Edit Row</button>
+                    <button className="px-3 py-1.5 rounded bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">Execute Action</button>
+                </div>
+            </div>
+        </div>
+    )
+}
