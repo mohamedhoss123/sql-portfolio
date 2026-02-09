@@ -12,6 +12,31 @@ function DashboardPage() {
     const [activeTable, setActiveTable] = useState<TableView>('projects')
     const [isDetailOpen, setIsDetailOpen] = useState(false)
     const [selectedId, setSelectedId] = useState('1001')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [showFilterBar, setShowFilterBar] = useState(false)
+
+    const filteredProjects = useMemo(() => {
+        return projects.filter(p =>
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.tech.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            p.status.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }, [searchTerm])
+
+    const filteredExperience = useMemo(() => {
+        return experience.filter(e =>
+            e.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            e.description.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }, [searchTerm])
+
+    const filteredSkills = useMemo(() => {
+        return skills.filter(s =>
+            s.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.items.some(i => i.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+    }, [searchTerm])
 
     const activeProject = useMemo(() =>
         projects.find(p => p.id === selectedId) || projects[0],
@@ -30,6 +55,12 @@ function DashboardPage() {
                         <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
                         <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
                         <span className="text-yellow-600 dark:text-code-orange">public.projects_tbl</span>
+                        {searchTerm && (
+                            <>
+                                <span className="text-primary dark:text-code-purple font-bold"> WHERE </span>
+                                <span className="text-green-600 dark:text-code-green">search_query</span> LIKE <span className="text-green-600 dark:text-code-green">'%{searchTerm}%'</span>
+                            </>
+                        )}
                         <span className="text-primary dark:text-code-purple font-bold"> ORDER BY </span>
                         date <span className="text-primary dark:text-code-purple font-bold">DESC</span>;
                     </>
@@ -39,7 +70,14 @@ function DashboardPage() {
                     <>
                         <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
                         <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
-                        <span className="text-yellow-600 dark:text-code-orange">public.experience_tbl</span>;
+                        <span className="text-yellow-600 dark:text-code-orange">public.experience_tbl</span>
+                        {searchTerm && (
+                            <>
+                                <span className="text-primary dark:text-code-purple font-bold"> WHERE </span>
+                                <span className="text-green-600 dark:text-code-green">role</span> ILIKE <span className="text-green-600 dark:text-code-green">'%{searchTerm}%'</span>
+                            </>
+                        )}
+                        ;
                     </>
                 )
             case 'skills':
@@ -47,11 +85,18 @@ function DashboardPage() {
                     <>
                         <span className="text-primary dark:text-code-purple font-bold">SELECT</span> *
                         <span className="text-primary dark:text-code-purple font-bold"> FROM </span>
-                        <span className="text-yellow-600 dark:text-code-orange">public.skills_matrix</span>;
+                        <span className="text-yellow-600 dark:text-code-orange">public.skills_matrix</span>
+                        {searchTerm && (
+                            <>
+                                <span className="text-primary dark:text-code-purple font-bold"> WHERE </span>
+                                <span className="text-green-600 dark:text-code-green">category</span> = <span className="text-green-600 dark:text-code-green">'%{searchTerm}%'</span>
+                            </>
+                        )}
+                        ;
                     </>
                 )
         }
-    }, [activeTable])
+    }, [activeTable, searchTerm])
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen flex flex-col overflow-hidden selection:bg-primary/30 selection:text-white relative">
@@ -94,58 +139,37 @@ function DashboardPage() {
                         </div>
                     </div>
                     <nav className="flex-1 p-2 space-y-1 text-sm">
-                        <div className="group">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white cursor-pointer">
-                                <span className="material-icons text-xs transform transition-transform group-hover:rotate-90">arrow_right</span>
-                                <span className="material-icons text-sm text-yellow-500">folder</span>
-                                <span>schemas</span>
-                            </div>
-                        </div>
-                        <div className="group">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-800 dark:text-gray-200 cursor-pointer">
-                                <span className="material-icons text-xs transform rotate-90">arrow_right</span>
-                                <span className="material-icons text-sm text-yellow-500">folder_open</span>
-                                <span>public</span>
-                            </div>
-                            <div className="ml-6 space-y-0.5 mt-1 border-l border-gray-200 dark:border-db-border pl-2">
-                                <button
-                                    onClick={() => setActiveTable('projects')}
-                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'projects'
-                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
-                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
-                                        }`}
-                                >
-                                    <span className="material-icons text-sm">table_chart</span>
-                                    <span>projects_tbl</span>
-                                </button>
-                                <button
-                                    onClick={() => setActiveTable('experience')}
-                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'experience'
-                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
-                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
-                                        }`}
-                                >
-                                    <span className="material-icons text-sm">table_chart</span>
-                                    <span>experience_tbl</span>
-                                </button>
-                                <button
-                                    onClick={() => setActiveTable('skills')}
-                                    className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'skills'
-                                        ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
-                                        : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
-                                        }`}
-                                >
-                                    <span className="material-icons text-sm">insights</span>
-                                    <span>skills_matrix</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="group mt-4">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-white cursor-pointer">
-                                <span className="material-icons text-xs transform">arrow_right</span>
-                                <span className="material-icons text-sm text-purple-500">visibility</span>
-                                <span>stored_procedures</span>
-                            </div>
+                        <div className="space-y-0.5 mt-1 pl-1">
+                            <button
+                                onClick={() => { setActiveTable('projects'); setSearchTerm(''); }}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'projects'
+                                    ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                    : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                    }`}
+                            >
+                                <span className="material-icons text-sm">table_chart</span>
+                                <span>projects_tbl</span>
+                            </button>
+                            <button
+                                onClick={() => { setActiveTable('experience'); setSearchTerm(''); }}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'experience'
+                                    ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                    : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                    }`}
+                            >
+                                <span className="material-icons text-sm">table_chart</span>
+                                <span>experience_tbl</span>
+                            </button>
+                            <button
+                                onClick={() => { setActiveTable('skills'); setSearchTerm(''); }}
+                                className={`w-full flex items-center gap-2 px-2 py-1.5 text-left rounded cursor-pointer border-l-2 transition-all ${activeTable === 'skills'
+                                    ? 'bg-primary/10 text-primary dark:text-code-blue border-primary'
+                                    : 'text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-db-dark/50 hover:text-primary'
+                                    }`}
+                            >
+                                <span className="material-icons text-sm">insights</span>
+                                <span>skills_matrix</span>
+                            </button>
                         </div>
                     </nav>
                     <div className="p-4 border-t border-gray-200 dark:border-db-border">
@@ -173,16 +197,47 @@ function DashboardPage() {
 
                     {/* Toolbar */}
                     <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-db-border bg-white dark:bg-db-dark">
-                        <div className="flex items-center gap-2">
-                            <button className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Refresh">
+                        <div className="flex items-center gap-2 flex-1">
+                            <button className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Refresh" onClick={() => setSearchTerm('')}>
                                 <span className="material-icons text-lg">refresh</span>
                             </button>
-                            <button className="p-1.5 text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Filter">
+                            <button
+                                className={`p-1.5 rounded transition-colors ${showFilterBar || searchTerm ? 'text-primary bg-primary/10' : 'text-gray-500 hover:text-primary hover:bg-primary/10'}`}
+                                title="Filter"
+                                onClick={() => setShowFilterBar(!showFilterBar)}
+                            >
                                 <span className="material-icons text-lg">filter_list</span>
                             </button>
+
+                            {showFilterBar && (
+                                <div className="flex items-center gap-2 ml-2 animate-in slide-in-from-left-2 duration-200 flex-1 max-w-xs">
+                                    <div className="relative w-full">
+                                        <input
+                                            type="text"
+                                            placeholder={`Search in ${activeTable}_tbl...`}
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full bg-gray-50 dark:bg-db-panel border border-gray-200 dark:border-db-border rounded px-3 py-1 text-xs font-mono focus:outline-none focus:border-primary/50 text-gray-700 dark:text-gray-300 transition-colors"
+                                            autoFocus
+                                        />
+                                        {searchTerm && (
+                                            <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                            >
+                                                <span className="material-icons text-sm">close</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="h-4 w-px bg-gray-300 dark:bg-db-border mx-1"></div>
                             <span className="text-xs text-gray-500 font-mono">
-                                Showing all rows from {activeTable}_tbl
+                                {searchTerm ? `Showing matching rows (${activeTable === 'projects' ? filteredProjects.length :
+                                    activeTable === 'experience' ? filteredExperience.length :
+                                        filteredSkills.length
+                                    })` : `Showing all rows from ${activeTable}_tbl`}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -225,7 +280,7 @@ function DashboardPage() {
                                 )}
                             </thead>
                             <tbody className="text-sm font-mono text-gray-700 dark:text-gray-300 divide-y divide-gray-200 dark:divide-db-border">
-                                {activeTable === 'projects' && projects.map((project, index) => (
+                                {activeTable === 'projects' && filteredProjects.map((project, index) => (
                                     <tr
                                         key={project.id}
                                         onClick={() => openDetail(project.id)}
@@ -257,7 +312,7 @@ function DashboardPage() {
                                     </tr>
                                 ))}
 
-                                {activeTable === 'experience' && experience.map((exp, index) => (
+                                {activeTable === 'experience' && filteredExperience.map((exp, index) => (
                                     <tr key={exp.id} className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default">
                                         <td className="border-r border-gray-200 dark:border-db-border text-center text-gray-400 text-xs bg-gray-50 dark:bg-db-panel/50">{index + 1}</td>
                                         <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border">
@@ -278,7 +333,7 @@ function DashboardPage() {
                                     </tr>
                                 ))}
 
-                                {activeTable === 'skills' && skills.map((skill, index) => (
+                                {activeTable === 'skills' && filteredSkills.map((skill, index) => (
                                     <tr key={skill.id} className="group hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-default">
                                         <td className="border-r border-gray-200 dark:border-db-border text-center text-gray-400 text-xs bg-gray-50 dark:bg-db-panel/50">{index + 1}</td>
                                         <td className="py-3 px-4 border-r border-gray-200 dark:border-db-border font-medium text-gray-900 dark:text-white">{skill.category}</td>
@@ -299,6 +354,16 @@ function DashboardPage() {
                                         </td>
                                     </tr>
                                 ))}
+
+                                {((activeTable === 'projects' && filteredProjects.length === 0) ||
+                                    (activeTable === 'experience' && filteredExperience.length === 0) ||
+                                    (activeTable === 'skills' && filteredSkills.length === 0)) && (
+                                        <tr>
+                                            <td colSpan={6} className="py-20 text-center text-gray-500 dark:text-gray-400 font-mono italic">
+                                                0 rows returned. query executed in 0.001s
+                                            </td>
+                                        </tr>
+                                    )}
                             </tbody>
                         </table>
                         <div className="p-8 text-center text-gray-400 dark:text-gray-600 font-mono text-sm opacity-50">
